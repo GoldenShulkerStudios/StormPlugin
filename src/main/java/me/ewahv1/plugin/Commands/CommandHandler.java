@@ -12,19 +12,22 @@ public class CommandHandler implements CommandExecutor {
     private final ToggleStormCommand toggleStormCommand;
     private final StormStatusCommand stormStatusCommand;
     private final SetBaseStormTimeCommand setBaseStormTimeCommand;
+    private final ReverseStormCommand reverseStormCommand; // Agregar ReverseStormCommand
 
     public CommandHandler(
             ResetStormCommand resetStormCommand,
             SetStormTimeCommand setStormTimeCommand,
             ToggleStormCommand toggleStormCommand,
             StormStatusCommand stormStatusCommand,
-            SetBaseStormTimeCommand setBaseStormTimeCommand
+            SetBaseStormTimeCommand setBaseStormTimeCommand,
+            ReverseStormCommand reverseStormCommand // Agregar ReverseStormCommand
     ) {
         this.resetStormCommand = resetStormCommand;
         this.setStormTimeCommand = setStormTimeCommand;
         this.toggleStormCommand = toggleStormCommand;
         this.stormStatusCommand = stormStatusCommand;
         this.setBaseStormTimeCommand = setBaseStormTimeCommand;
+        this.reverseStormCommand = reverseStormCommand; // Agregar ReverseStormCommand
     }
 
     @Override
@@ -56,8 +59,10 @@ public class CommandHandler implements CommandExecutor {
                 return toggleStormCommand.onCommand(sender, command, label, args);
             case "status":
                 return stormStatusCommand.onCommand(sender, command, label, args);
+            case "reverse": // Agregar el caso para reverse
+                return reverseStormCommand.onCommand(sender, command, label, args);
             default:
-                sender.sendMessage("Comando desconocido. Usa /storm <reset|set|toggle|status>");
+                sender.sendMessage("Comando desconocido. Usa /storm <reset|set|toggle|status|reverse>");
                 return false;
         }
     }

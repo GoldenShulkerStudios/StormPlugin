@@ -7,7 +7,7 @@ api-version: 1.20
 commands:
   storm:
     description: Comando principal para gestionar tormentas.
-    usage: /storm <reset|set|toggle|status> [BaseTime|CurrentTime]
+    usage: /storm <reset|set|toggle|status|reverse> [BaseTime|CurrentTime]
     permission: ${name}.use
 permissions:
   ${name}.use:

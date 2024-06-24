@@ -30,15 +30,12 @@ public class ResetStormCommand implements CommandExecutor {
                 @Override
                 public void run() {
                     try (Connection connection = databaseConnection.getConnection()) {
-                        // Detener el contador que disminuye el StormTime
                         stormListener.stopStormTimer();
 
-                        // Reiniciar la tormenta
-                        stormListener.setStormTime(0);
-                        stormListener.setBaseStormTime(600);
+                        stormListener.setRemainingStormTime(0);
+                        stormListener.setDefaultStormTime(600);
                         stormListener.hideBossBar();
 
-                        // Limpiar el clima en el mundo del jugador
                         new BukkitRunnable() {
                             @Override
                             public void run() {
@@ -47,8 +44,7 @@ public class ResetStormCommand implements CommandExecutor {
                             }
                         }.runTask(Main.getInstance());
 
-                        // Actualizar los valores en la base de datos
-                        PreparedStatement updateStatement = connection.prepareStatement("UPDATE stormsettings SET StormTime = 0, BaseStormTime = 600 WHERE ID = 1");
+                        PreparedStatement updateStatement = connection.prepareStatement("UPDATE stormsettings SET RemainingStormTime = 0, DefaultStormTime = 600, PlayerDeathCounter = 0 WHERE ID = 1");
                         updateStatement.executeUpdate();
                     } catch (Exception e) {
                         e.printStackTrace();

@@ -35,13 +35,17 @@ public class StormStatusCommand implements CommandExecutor {
                         ResultSet resultSet = preparedStatement.executeQuery();
                         if (resultSet.next()) {
                             boolean isActive = resultSet.getBoolean("StormActive");
-                            int stormTime = resultSet.getInt("StormTime");
+                            int remainingStormTime = resultSet.getInt("RemainingStormTime");
+                            int defaultStormTime = resultSet.getInt("DefaultStormTime");
+                            int playerDeathCounter = resultSet.getInt("PlayerDeathCounter");
 
                             new BukkitRunnable() {
                                 @Override
                                 public void run() {
                                     player.sendMessage("Estado de la tormenta: " + (isActive ? "Activada" : "Desactivada"));
-                                    player.sendMessage("Tiempo de la tormenta: " + stormTime + " segundos");
+                                    player.sendMessage("Tiempo restante de la tormenta: " + remainingStormTime + " segundos");
+                                    player.sendMessage("Tiempo base de la tormenta: " + defaultStormTime + " segundos");
+                                    player.sendMessage("Contador de muertes de jugadores: " + playerDeathCounter);
                                 }
                             }.runTask(Main.getInstance());
                         }

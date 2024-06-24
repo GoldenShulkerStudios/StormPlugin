@@ -26,31 +26,21 @@ public class SetBaseStormTimeCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (sender instanceof Player) {
             Player player = (Player) sender;
-
-            // Verificar que los argumentos sean correctos
             if (args.length < 3 || !args[0].equalsIgnoreCase("set") || !args[1].equalsIgnoreCase("BaseTime")) {
                 player.sendMessage("Uso: /storm set BaseTime <tiempo>");
-                player.sendMessage("Argumentos recibidos: " + String.join(", ", args));
                 return true;
             }
 
             try {
                 int baseTime = Integer.parseInt(args[2]);
-
-                // Ejecutar la tarea de actualización de forma asíncrona
                 new BukkitRunnable() {
                     @Override
                     public void run() {
                         try (Connection connection = databaseConnection.getConnection()) {
-                            // Actualizar el tiempo base de la tormenta en el listener
-                            stormListener.setBaseStormTime(baseTime);
-
-                            // Actualizar la base de datos
-                            PreparedStatement updateStatement = connection.prepareStatement("UPDATE stormsettings SET BaseStormTime = ? WHERE ID = 1");
+                            stormListener.setDefaultStormTime(baseTime);
+                            PreparedStatement updateStatement = connection.prepareStatement("UPDATE stormsettings SET DefaultStormTime = ? WHERE ID = 1");
                             updateStatement.setInt(1, baseTime);
                             updateStatement.executeUpdate();
-
-                            // Enviar mensaje al jugador en el hilo principal
                             new BukkitRunnable() {
                                 @Override
                                 public void run() {
@@ -59,7 +49,6 @@ public class SetBaseStormTimeCommand implements CommandExecutor {
                             }.runTask(Main.getInstance());
                         } catch (Exception e) {
                             e.printStackTrace();
-                            // Manejar errores y enviar mensaje al jugador
                             new BukkitRunnable() {
                                 @Override
                                 public void run() {

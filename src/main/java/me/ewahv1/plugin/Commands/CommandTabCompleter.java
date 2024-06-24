@@ -18,6 +18,7 @@ public class CommandTabCompleter implements TabCompleter {
             completions.add("toggle");
             completions.add("status");
             completions.add("set");
+            completions.add("reverse"); // Agregar reverse
         } else if (args.length == 2 && args[0].equalsIgnoreCase("set")) {
             completions.add("BaseTime");
             completions.add("CurrentTime");

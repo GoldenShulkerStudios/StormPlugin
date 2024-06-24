@@ -57,9 +57,9 @@ public class ToggleStormCommand implements CommandExecutor {
                                 if (finalIsActive) {
                                     player.getWorld().setStorm(false);
                                     stormListener.setStormActive(false);
-                                    stormListener.setStormTime(0);
+                                    stormListener.setRemainingStormTime(0);
                                     stormListener.hideBossBar();
-                                    updateStatement = connection.prepareStatement("UPDATE stormsettings SET StormActive = false, StormTime = 0 WHERE ID = 1");
+                                    updateStatement = connection.prepareStatement("UPDATE stormsettings SET StormActive = false, RemainingStormTime = 0 WHERE ID = 1");
                                     updateStatement.executeUpdate();
                                     player.sendMessage("La tormenta ha sido desactivada.");
                                 } else {
