@@ -117,11 +117,12 @@ public class StormListener implements Listener {
                         e.printStackTrace();
                     }
 
-                    // Asegurarse de que la tormenta esté activa
+                    // Asegurarse de que la tormenta esté activa (con truenos)
                     new BukkitRunnable() {
                         @Override
                         public void run() {
                             player.getWorld().setStorm(true);
+                            player.getWorld().setThundering(true);
                             player.getWorld().setWeatherDuration(remainingStormTime * 20);
                         }
                     }.runTask(plugin);
@@ -146,6 +147,7 @@ public class StormListener implements Listener {
                                     stopStormTimer();
                                     bossBar.removeAll();
                                     player.getWorld().setStorm(false);
+                                    player.getWorld().setThundering(false);
                                 }
                                 try (Connection connection = databaseConnection.getConnection();
                                      PreparedStatement preparedStatement = connection.prepareStatement("UPDATE stormsettings SET RemainingStormTime = ? WHERE ID = 1")) {

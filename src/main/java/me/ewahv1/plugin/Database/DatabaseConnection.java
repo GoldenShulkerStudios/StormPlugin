@@ -8,13 +8,13 @@ import java.sql.SQLException;
 
 public class DatabaseConnection {
 
-    private static HikariDataSource dataSource;
+    private HikariDataSource dataSource;
 
-    public DatabaseConnection() {
+    public DatabaseConnection(String url, String username, String password) {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://localhost:3306/stormdb");
-        config.setUsername("root");
-        config.setPassword("root");
+        config.setJdbcUrl(url);
+        config.setUsername(username);
+        config.setPassword(password);
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
