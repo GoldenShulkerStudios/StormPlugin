@@ -23,7 +23,7 @@ public class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        File configFile = new File(getDataFolder(), "StormPlugin/db_config.json");
+        File configFile = new File(getDataFolder(), "db_config.json");
         DatabaseConfig config = loadOrCreateConfig(configFile);
         databaseConnection = new DatabaseConnection(config.getUrl(), config.getUsername(), config.getPassword());
         StormListener stormListener = new StormListener(this, databaseConnection);
