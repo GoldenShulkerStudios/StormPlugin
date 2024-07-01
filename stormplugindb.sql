@@ -5,13 +5,13 @@
  Source Server Type    : MySQL
  Source Server Version : 80400
  Source Host           : localhost:3306
- Source Schema         : stormdb
+ Source Schema         : stormplugindb
 
  Target Server Type    : MySQL
  Target Server Version : 80400
  File Encoding         : 65001
 
- Date: 26/06/2024 18:40:12
+ Date: 01/07/2024 16:14:33
 */
 
 SET NAMES utf8mb4;
@@ -33,6 +33,6 @@ CREATE TABLE `stormsettings`  (
 -- ----------------------------
 -- Records of stormsettings
 -- ----------------------------
-INSERT INTO `stormsettings` VALUES (1, 0, 600, 1, 0);
+INSERT INTO `stormsettings` VALUES (1, 1174, 600, 1, 2);
 
 SET FOREIGN_KEY_CHECKS = 1;
