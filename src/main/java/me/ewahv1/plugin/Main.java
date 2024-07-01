@@ -54,7 +54,7 @@ public class Main extends JavaPlugin {
         if (!file.exists()) {
             file.getParentFile().mkdirs();
             DatabaseConfig defaultConfig = new DatabaseConfig();
-            defaultConfig.setUrl("jdbc:mysql://localhost:3306/stormdb");
+            defaultConfig.setUrl("jdbc:mysql://localhost:3306/stormplugindb");
             defaultConfig.setUsername("root");
             defaultConfig.setPassword("root");
             try (FileWriter writer = new FileWriter(file)) {
