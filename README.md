@@ -1,7 +1,7 @@
 
 # StormPlugin
 
-StormPlugin es un plugin para Minecraft que gestiona las tormentas en el servidor. Incluye el control del tiempo de tormenta, la activación y desactivación de tormentas, y la sincronización de datos con una base de datos MySQL.
+StormPlugin es un plugin para Minecraft 1.21 que gestiona las tormentas en el servidor. Incluye el control del tiempo de tormenta, la activación y desactivación de tormentas, y la sincronización de datos con una base de datos MySQL.
 
 ## Características
 
