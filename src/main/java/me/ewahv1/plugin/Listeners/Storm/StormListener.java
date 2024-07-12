@@ -1,6 +1,7 @@
 package me.ewahv1.plugin.Listeners.Storm;
 
-import me.ewahv1.plugin.Database.DatabaseConnection;
+import me.ewahv1.plugin.CreateFiles.JsonManager;
+import me.ewahv1.plugin.Database.DatabaseSyncManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -19,28 +20,30 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.io.File;
 
 public class StormListener implements Listener {
 
     private JavaPlugin plugin;
-    private DatabaseConnection databaseConnection;
+    private DatabaseSyncManager databaseSyncManager;
     private int remainingStormTime;
     private int defaultStormTime = 600;
     private boolean stormActive;
     private int playerDeathCounter;
     private Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
     private Objective objective;
-    private BossBar bossBar = Bukkit.createBossBar(ChatColor.GRAY + "Tiempo restante de la tormenta: ", BarColor.WHITE, BarStyle.SOLID);
+    private BossBar bossBar = Bukkit.createBossBar(ChatColor.GRAY + "Tiempo restante de la tormenta: ", BarColor.WHITE,
+            BarStyle.SOLID);
     private BukkitTask stormTask;
 
-    public StormListener(JavaPlugin plugin, DatabaseConnection databaseConnection) {
+    private File configFile;
+
+    // Constructor del listener de tormentas
+    public StormListener(JavaPlugin plugin, DatabaseSyncManager databaseSyncManager) {
         this.plugin = plugin;
-        this.databaseConnection = databaseConnection;
-        loadSettingsFromDatabase();
+        this.databaseSyncManager = databaseSyncManager;
+        this.configFile = new File(plugin.getDataFolder(), "stormsettings.json");
+        loadSettingsFromFile(); // Carga los ajustes de la tormenta desde el archivo JSON
         if (scoreboard.getObjective("stormTime") == null) {
             objective = scoreboard.registerNewObjective("stormTime", "dummy", ChatColor.GRAY + "Quedan ");
         } else {
@@ -48,41 +51,78 @@ public class StormListener implements Listener {
         }
     }
 
-    private void loadSettingsFromDatabase() {
-        try (Connection connection = databaseConnection.getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery("SELECT * FROM stormsettings WHERE ID = 1")) {
-            while (resultSet.next()) {
-                remainingStormTime = resultSet.getInt("RemainingStormTime");
-                defaultStormTime = resultSet.getInt("DefaultStormTime");
-                stormActive = resultSet.getBoolean("StormActive");
-                playerDeathCounter = resultSet.getInt("PlayerDeathCounter");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+    // Carga los ajustes de la tormenta desde el archivo JSON
+    private void loadSettingsFromFile() {
+        if (!configFile.exists()) {
+            saveSettingsToFile(); // Crea el archivo con valores por defecto si no existe
+        }
+        StormSettings config = JsonManager.loadConfig(configFile, StormSettings.class);
+        if (config != null) {
+            remainingStormTime = config.getRemainingStormTime();
+            defaultStormTime = config.getDefaultStormTime();
+            stormActive = config.isStormActive();
+            playerDeathCounter = config.getPlayerDeathCounter();
         }
     }
 
+    // Guarda los ajustes de la tormenta en el archivo JSON y sincroniza con la base
+    // de datos
+    private void saveSettingsToFile() {
+        StormSettings config = new StormSettings(remainingStormTime, defaultStormTime, stormActive, playerDeathCounter);
+        JsonManager.saveConfig(configFile, config);
+        databaseSyncManager.syncToDatabase(config); // Sincroniza con la base de datos en tiempo real
+    }
+
+    // Establece el tiempo restante de la tormenta y guarda los ajustes
     public void setRemainingStormTime(int time) {
         this.remainingStormTime = time;
+        saveSettingsToFile();
     }
 
+    // Establece el tiempo base de la tormenta y guarda los ajustes
     public void setDefaultStormTime(int time) {
         this.defaultStormTime = time;
+        saveSettingsToFile();
     }
 
+    // Establece el estado de la tormenta (activa o no) y guarda los ajustes
     public void setStormActive(boolean active) {
         this.stormActive = active;
+        saveSettingsToFile();
     }
 
+    // Obtiene el estado de la tormenta (activa o no)
+    public boolean isStormActive() {
+        return this.stormActive;
+    }
+
+    // Obtiene el tiempo restante de la tormenta
     public int getRemainingStormTime() {
         return this.remainingStormTime;
     }
 
+    // Obtiene el tiempo base de la tormenta
+    public int getDefaultStormTime() {
+        return this.defaultStormTime;
+    }
+
+    // Obtiene el contador de muertes de jugadores durante la tormenta
+    public int getPlayerDeathCounter() {
+        return this.playerDeathCounter;
+    }
+
+    // Establece el contador de muertes de jugadores y guarda los ajustes
+    public void setPlayerDeathCounter(int count) {
+        this.playerDeathCounter = count;
+        saveSettingsToFile();
+    }
+
+    // Oculta la barra de estado de la tormenta
     public void hideBossBar() {
         this.bossBar.setVisible(false);
     }
 
+    // Detiene el temporizador de la tormenta
     public void stopStormTimer() {
         if (stormTask != null) {
             stormTask.cancel();
@@ -90,6 +130,7 @@ public class StormListener implements Listener {
         }
     }
 
+    // Evento que se dispara cuando un jugador muere
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
@@ -97,25 +138,9 @@ public class StormListener implements Listener {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    try (Connection connection = databaseConnection.getConnection()) {
-                        PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM stormsettings WHERE ID = 1");
-                        ResultSet resultSet = preparedStatement.executeQuery();
-                        if (resultSet.next()) {
-                            playerDeathCounter = resultSet.getInt("PlayerDeathCounter");
-                            remainingStormTime = resultSet.getInt("RemainingStormTime");
-                            defaultStormTime = resultSet.getInt("DefaultStormTime");
-
-                            playerDeathCounter++;
-                            remainingStormTime += defaultStormTime * playerDeathCounter;
-
-                            PreparedStatement updateStatement = connection.prepareStatement("UPDATE stormsettings SET PlayerDeathCounter = ?, RemainingStormTime = ? WHERE ID = 1");
-                            updateStatement.setInt(1, playerDeathCounter);
-                            updateStatement.setInt(2, remainingStormTime);
-                            updateStatement.executeUpdate();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    playerDeathCounter++;
+                    remainingStormTime += defaultStormTime * playerDeathCounter;
+                    saveSettingsToFile();
 
                     // Asegurarse de que la tormenta esté activa (con truenos)
                     new BukkitRunnable() {
@@ -149,13 +174,7 @@ public class StormListener implements Listener {
                                     player.getWorld().setStorm(false);
                                     player.getWorld().setThundering(false);
                                 }
-                                try (Connection connection = databaseConnection.getConnection();
-                                     PreparedStatement preparedStatement = connection.prepareStatement("UPDATE stormsettings SET RemainingStormTime = ? WHERE ID = 1")) {
-                                    preparedStatement.setInt(1, remainingStormTime);
-                                    preparedStatement.executeUpdate();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
+                                saveSettingsToFile();
                             }
                         }
                     }, 0L, 20L);
@@ -164,6 +183,7 @@ public class StormListener implements Listener {
         }
     }
 
+    // Evento que se dispara cuando un jugador se une al servidor
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
@@ -172,6 +192,7 @@ public class StormListener implements Listener {
         }
     }
 
+    // Evento que se dispara cuando un jugador intenta dormir
     @EventHandler
     public void onPlayerBedEnter(PlayerBedEnterEvent event) {
         Player player = event.getPlayer();
@@ -181,10 +202,12 @@ public class StormListener implements Listener {
         }
     }
 
+    // Actualiza la barra de estado de la tormenta con el tiempo restante
     private void updateBossBar() {
         int hours = remainingStormTime / 3600;
         int minutes = (remainingStormTime % 3600) / 60;
         int seconds = remainingStormTime % 60;
-        bossBar.setTitle(ChatColor.GRAY + "Tiempo restante de la tormenta: " + hours + "h " + minutes + "m " + seconds + "s");
+        bossBar.setTitle(
+                ChatColor.GRAY + "Tiempo restante de la tormenta: " + hours + "h " + minutes + "m " + seconds + "s");
     }
 }
