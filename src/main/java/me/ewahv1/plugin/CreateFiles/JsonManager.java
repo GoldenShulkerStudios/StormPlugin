@@ -10,32 +10,29 @@ import java.io.IOException;
 
 public class JsonManager {
 
-    // Instancia de Gson para la serialización y deserialización de JSON con formato
-    // de impresión bonita
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    // Método genérico para cargar la configuración desde un archivo JSON
+    public void initialize() {
+        InitialStormConfigJson.createJson();
+    }
+
     public static <T> T loadConfig(File file, Class<T> clazz) {
         if (!file.exists()) {
-            return null; // Retorna null si el archivo no existe
+            return null;
         }
         try (FileReader reader = new FileReader(file)) {
-            return gson.fromJson(reader, clazz); // Deserializa el JSON en una instancia de la clase especificada
+            return gson.fromJson(reader, clazz);
         } catch (IOException e) {
-            e.printStackTrace(); // Imprime el error en caso de fallo
+            e.printStackTrace();
             return null;
         }
     }
 
-    // Método para guardar la configuración en un archivo JSON
-    public static void saveConfig(File file, Object config) {
-        try {
-            file.getParentFile().mkdirs(); // Crea el directorio si no existe
-            try (FileWriter writer = new FileWriter(file)) {
-                gson.toJson(config, writer); // Serializa el objeto en formato JSON y lo guarda en el archivo
-            }
+    public static <T> void saveConfig(File file, T config) {
+        try (FileWriter writer = new FileWriter(file)) {
+            gson.toJson(config, writer);
         } catch (IOException e) {
-            e.printStackTrace(); // Imprime el error en caso de fallo
+            e.printStackTrace();
         }
     }
 }

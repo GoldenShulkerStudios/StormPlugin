@@ -1,19 +1,26 @@
 package me.ewahv1.plugin.Commands.Storm;
 
-import me.ewahv1.plugin.Main;
-import me.ewahv1.plugin.Listeners.Storm.StormListener;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import me.ewahv1.plugin.CreateFiles.InitialStormConfigJson.StormConfig;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class StormStatusCommand implements CommandExecutor {
 
-    private final StormListener stormListener;
+    private final JavaPlugin plugin;
 
-    public StormStatusCommand(StormListener stormListener) {
-        this.stormListener = stormListener;
+    public StormStatusCommand(JavaPlugin plugin) {
+        this.plugin = plugin;
     }
 
     @Override
@@ -23,22 +30,36 @@ public class StormStatusCommand implements CommandExecutor {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    boolean isActive = stormListener.isStormActive();
-                    int remainingStormTime = stormListener.getRemainingStormTime();
-                    int defaultStormTime = stormListener.getDefaultStormTime();
-                    int playerDeathCounter = stormListener.getPlayerDeathCounter();
+                    File configFile = new File(plugin.getDataFolder(), "StormConfig.json");
+                    if (configFile.exists()) {
+                        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                        try (FileReader reader = new FileReader(configFile)) {
+                            StormConfig config = gson.fromJson(reader, StormConfig.class);
+                            boolean isActive = config.isStormActive();
+                            int remainingStormTime = config.getRemainingStormTime();
+                            int defaultStormTime = config.getDefaultStormTime();
+                            int playerDeathCounter = config.getPlayerDeathCounter();
 
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            player.sendMessage("Estado de la tormenta: " + (isActive ? "Activada" : "Desactivada"));
-                            player.sendMessage("Tiempo restante de la tormenta: " + remainingStormTime + " segundos");
-                            player.sendMessage("Tiempo base de la tormenta: " + defaultStormTime + " segundos");
-                            player.sendMessage("Contador de muertes de jugadores: " + playerDeathCounter);
+                            new BukkitRunnable() {
+                                @Override
+                                public void run() {
+                                    player.sendMessage(
+                                            "Estado de la tormenta: " + (isActive ? "Activada" : "Desactivada"));
+                                    player.sendMessage(
+                                            "Tiempo restante de la tormenta: " + remainingStormTime + " segundos");
+                                    player.sendMessage("Tiempo base de la tormenta: " + defaultStormTime + " segundos");
+                                    player.sendMessage("Contador de muertes de jugadores: " + playerDeathCounter);
+                                }
+                            }.runTask(plugin);
+                        } catch (IOException | JsonSyntaxException e) {
+                            sender.sendMessage("An error occurred while reading the storm configuration.");
+                            e.printStackTrace();
                         }
-                    }.runTask(Main.getInstance());
+                    } else {
+                        sender.sendMessage("StormConfig.json not found.");
+                    }
                 }
-            }.runTaskAsynchronously(Main.getInstance());
+            }.runTaskAsynchronously(plugin);
             return true;
         } else {
             sender.sendMessage("Este comando solo puede ser utilizado por un jugador.");
