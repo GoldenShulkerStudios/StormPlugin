@@ -40,7 +40,6 @@ public class ResetStormCommand implements CommandExecutor {
                     writer.write(json);
                     sender.sendMessage("Storm has been reset to default values.");
 
-                    // Apagar la tormenta si está activa
                     for (World world : Bukkit.getWorlds()) {
                         if (world.hasStorm()) {
                             world.setStorm(false);
@@ -48,7 +47,6 @@ public class ResetStormCommand implements CommandExecutor {
                         }
                     }
 
-                    // Detener el temporizador de la tormenta y ocultar la barra de jefe
                     stormListener.stopStormTimer();
                     stormListener.hideBossBar();
 

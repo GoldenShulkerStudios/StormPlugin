@@ -60,8 +60,7 @@ public class SetBaseStormTimeCommand implements CommandExecutor {
                                         player.sendMessage("El tiempo base de la tormenta ha sido establecido a "
                                                 + baseTime + " segundos.");
                                         stormListener.saveSettingsToFile(config);
-                                        stormListener.restartStormTimer(config); // Reinicia el temporizador de tormenta
-                                                                                 // con el nuevo tiempo base
+                                        stormListener.restartStormTimer(config);
                                     }
                                 }.runTask(plugin);
                             } catch (IOException | JsonSyntaxException e) {

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import me.ewahv1.plugin.CreateFiles.InitialStormConfigJson.StormConfig;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -43,26 +44,29 @@ public class StormStatusCommand implements CommandExecutor {
                             new BukkitRunnable() {
                                 @Override
                                 public void run() {
-                                    player.sendMessage(
-                                            "Estado de la tormenta: " + (isActive ? "Activada" : "Desactivada"));
-                                    player.sendMessage(
-                                            "Tiempo restante de la tormenta: " + remainingStormTime + " segundos");
-                                    player.sendMessage("Tiempo base de la tormenta: " + defaultStormTime + " segundos");
-                                    player.sendMessage("Contador de muertes de jugadores: " + playerDeathCounter);
+                                    player.sendMessage(ChatColor.GOLD + "Estado de la tormenta: " +
+                                            (isActive ? ChatColor.GREEN + "Activada" : ChatColor.RED + "Desactivada"));
+                                    player.sendMessage(ChatColor.GOLD + "Tiempo restante de la tormenta: " +
+                                            ChatColor.AQUA + remainingStormTime + ChatColor.GOLD + " segundos");
+                                    player.sendMessage(ChatColor.GOLD + "Tiempo base de la tormenta: " +
+                                            ChatColor.AQUA + defaultStormTime + ChatColor.GOLD + " segundos");
+                                    player.sendMessage(ChatColor.GOLD + "Contador de muertes de jugadores: " +
+                                            ChatColor.AQUA + playerDeathCounter);
                                 }
                             }.runTask(plugin);
                         } catch (IOException | JsonSyntaxException e) {
-                            sender.sendMessage("An error occurred while reading the storm configuration.");
+                            sender.sendMessage(
+                                    ChatColor.RED + "An error occurred while reading the storm configuration.");
                             e.printStackTrace();
                         }
                     } else {
-                        sender.sendMessage("StormConfig.json not found.");
+                        sender.sendMessage(ChatColor.RED + "StormConfig.json not found.");
                     }
                 }
             }.runTaskAsynchronously(plugin);
             return true;
         } else {
-            sender.sendMessage("Este comando solo puede ser utilizado por un jugador.");
+            sender.sendMessage(ChatColor.RED + "Este comando solo puede ser utilizado por un jugador.");
         }
         return false;
     }

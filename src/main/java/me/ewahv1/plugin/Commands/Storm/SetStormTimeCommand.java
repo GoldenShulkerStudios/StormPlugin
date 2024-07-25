@@ -60,8 +60,7 @@ public class SetStormTimeCommand implements CommandExecutor {
                                         player.sendMessage("El tiempo actual de la tormenta ha sido establecido a "
                                                 + currentTime + " segundos.");
                                         stormListener.saveSettingsToFile(config);
-                                        stormListener.restartStormTimer(config); // Reinicia el temporizador de tormenta
-                                                                                 // con el nuevo tiempo actual
+                                        stormListener.restartStormTimer(config);
                                     }
                                 }.runTask(plugin);
                             } catch (IOException | JsonSyntaxException e) {

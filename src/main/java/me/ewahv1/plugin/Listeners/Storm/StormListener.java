@@ -33,7 +33,6 @@ public class StormListener implements Listener {
 
     private File configFile;
 
-    // Constructor del listener de tormentas
     public StormListener(JavaPlugin plugin) {
         this.plugin = plugin;
         this.configFile = new File(plugin.getDataFolder(), "StormConfig.json");
@@ -49,7 +48,6 @@ public class StormListener implements Listener {
         }
     }
 
-    // Carga los ajustes de la tormenta desde el archivo JSON
     public StormSettings loadSettingsFromFile() {
         StormSettings config = JsonManager.loadConfig(configFile, StormSettings.class);
         if (config == null) {
@@ -63,7 +61,6 @@ public class StormListener implements Listener {
         return config;
     }
 
-    // Guarda los ajustes de la tormenta en el archivo JSON
     public void saveSettingsToFile(StormSettings config) {
         JsonManager.saveConfig(configFile, config);
         plugin.getLogger()
@@ -72,7 +69,6 @@ public class StormListener implements Listener {
                         + config.isStormActive() + ", PlayerDeathCounter=" + config.getPlayerDeathCounter());
     }
 
-    // Evento que se dispara cuando un jugador muere
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
@@ -84,7 +80,6 @@ public class StormListener implements Listener {
                     config.getRemainingStormTime() + config.getDefaultStormTime() * config.getPlayerDeathCounter());
             saveSettingsToFile(config);
 
-            // Asegurarse de que la tormenta esté activa (con truenos)
             new BukkitRunnable() {
                 @Override
                 public void run() {
@@ -126,7 +121,7 @@ public class StormListener implements Listener {
                     }
                 }
             }
-        }, 20L, 20L); // 20L ticks = 1 segundo
+        }, 20L, 20L);
     }
 
     public void restartStormTimer(StormSettings config) {
@@ -134,7 +129,6 @@ public class StormListener implements Listener {
         startStormTimer(config);
     }
 
-    // Evento que se dispara cuando un jugador se une al servidor
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
@@ -144,7 +138,6 @@ public class StormListener implements Listener {
         }
     }
 
-    // Evento que se dispara cuando un jugador intenta dormir
     @EventHandler
     public void onPlayerBedEnter(PlayerBedEnterEvent event) {
         Player player = event.getPlayer();
@@ -155,12 +148,10 @@ public class StormListener implements Listener {
         }
     }
 
-    // Oculta la barra de estado de la tormenta
     public void hideBossBar() {
         this.bossBar.setVisible(false);
     }
 
-    // Detiene el temporizador de la tormenta
     public void stopStormTimer() {
         if (stormTask != null) {
             stormTask.cancel();
@@ -168,7 +159,6 @@ public class StormListener implements Listener {
         }
     }
 
-    // Actualiza la barra de estado de la tormenta con el tiempo restante
     public void updateBossBar(StormSettings config) {
         int hours = config.getRemainingStormTime() / 3600;
         int minutes = (config.getRemainingStormTime() % 3600) / 60;
@@ -180,7 +170,6 @@ public class StormListener implements Listener {
         bossBar.setProgress(progress);
     }
 
-    // Clase interna para manejar la configuración de la tormenta
     public static class StormSettings {
         private int RemainingStormTime;
         private int DefaultStormTime;

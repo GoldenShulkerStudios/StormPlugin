@@ -51,7 +51,7 @@ public class ReverseStormCommand implements CommandExecutor {
                             }
 
                             if (playerDeathCounter > 0) {
-                                playerDeathCounter--; // Reduce the player death counter by 1
+                                playerDeathCounter--;
                             }
 
                             final int finalNewRemainingStormTime = newRemainingStormTime;
@@ -72,10 +72,10 @@ public class ReverseStormCommand implements CommandExecutor {
                                     player.getWorld().setThundering(false);
                                     player.sendMessage(
                                             "El tiempo de la tormenta ha sido revertido y el contador de muertes ha sido reducido en 1.");
-                                    stormListener.updateBossBar(config); // Actualiza la barra de jefe
-                                    stormListener.saveSettingsToFile(config); // Guarda los cambios en el JSON
-                                    stormListener.restartStormTimer(config); // Reinicia el temporizador de la tormenta
-                                                                             // con los nuevos valores
+                                    stormListener.updateBossBar(config);
+                                    stormListener.saveSettingsToFile(config);
+                                    stormListener.restartStormTimer(config);
+                                    stormListener.hideBossBar();
                                 }
                             }.runTask(plugin);
                         } catch (IOException | JsonSyntaxException e) {
