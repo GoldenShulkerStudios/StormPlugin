@@ -12,7 +12,6 @@ import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -51,29 +50,19 @@ public class StormListener implements Listener {
     public StormSettings loadSettingsFromFile() {
         StormSettings config = JsonManager.loadConfig(configFile, StormSettings.class);
         if (config == null) {
-            plugin.getLogger().warning("Could not load StormConfig.json or it does not exist.");
             config = new StormSettings(0, 600, false, 0); // Valores por defecto si no se puede cargar el JSON
         }
-        plugin.getLogger()
-                .info("Storm settings loaded: RemainingStormTime=" + config.getRemainingStormTime()
-                        + ", DefaultStormTime=" + config.getDefaultStormTime() + ", StormActive="
-                        + config.isStormActive() + ", PlayerDeathCounter=" + config.getPlayerDeathCounter());
         return config;
     }
 
     public void saveSettingsToFile(StormSettings config) {
         JsonManager.saveConfig(configFile, config);
-        plugin.getLogger()
-                .info("Storm settings saved: RemainingStormTime=" + config.getRemainingStormTime()
-                        + ", DefaultStormTime=" + config.getDefaultStormTime() + ", StormActive="
-                        + config.isStormActive() + ", PlayerDeathCounter=" + config.getPlayerDeathCounter());
     }
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
         StormSettings config = loadSettingsFromFile();
-        plugin.getLogger().info("Player death detected. StormActive: " + config.isStormActive());
         if (config.isStormActive()) {
             config.setPlayerDeathCounter(config.getPlayerDeathCounter() + 1);
             config.setRemainingStormTime(
@@ -86,7 +75,6 @@ public class StormListener implements Listener {
                     player.getWorld().setStorm(true);
                     player.getWorld().setThundering(true);
                     player.getWorld().setWeatherDuration(config.getRemainingStormTime() * 20);
-                    plugin.getLogger().info("Storm started: RemainingStormTime=" + config.getRemainingStormTime());
                 }
             }.runTask(plugin);
 
@@ -115,7 +103,6 @@ public class StormListener implements Listener {
                             bossBar.removeAll();
                             world.setStorm(false);
                             world.setThundering(false);
-                            plugin.getLogger().info("Storm ended.");
                         }
                         saveSettingsToFile(config);
                     }
